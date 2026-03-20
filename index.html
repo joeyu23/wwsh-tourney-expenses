@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WWSH Tourney Expenses</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface-2: #242836;
+    --border: #2e3344;
+    --text: #e4e6f0;
+    --text-dim: #8b8fa3;
+    --accent: #6c5ce7;
+    --accent-light: #a29bfe;
+    --green: #00b894;
+    --green-bg: rgba(0,184,148,0.12);
+    --red: #ff6b6b;
+    --red-bg: rgba(255,107,107,0.12);
+    --orange: #fdcb6e;
+    --orange-bg: rgba(253,203,110,0.12);
+    --blue: #74b9ff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  header h1 span { color: var(--accent-light); }
+  header p { color: var(--text-dim); font-size: 14px; }
+
+  /* Setup banner */
+  .setup-banner {
+    background: var(--orange-bg);
+    border: 1px solid rgba(253,203,110,0.3);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: none;
+  }
+
+  .setup-banner.active { display: block; }
+
+  .setup-banner h3 { color: var(--orange); font-size: 14px; margin-bottom: 8px; }
+  .setup-banner p { color: var(--text-dim); font-size: 13px; line-height: 1.5; }
+
+  .setup-banner input {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: monospace;
+  }
+
+  .setup-banner button {
+    margin-top: 8px;
+    padding: 8px 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Sync indicator */
+  .sync-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .sync-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .sync-dot.syncing {
+    background: var(--orange);
+    animation: pulse 1s infinite;
+  }
+
+  .sync-dot.error { background: var(--red); }
+  .sync-dot.offline { background: var(--text-dim); }
+
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .btn-refresh {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .btn-refresh:hover { border-color: var(--text-dim); color: var(--text); }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab.active { background: var(--accent); color: white; }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Form */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  input, select {
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, select:focus { border-color: var(--accent); }
+  select { cursor: pointer; }
+  select option { background: var(--surface-2); }
+
+  .split-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 6px;
+  }
+
+  .split-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--surface-2);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s;
+    user-select: none;
+  }
+
+  .split-check:hover { background: var(--border); }
+  .split-check input { width: 16px; height: 16px; accent-color: var(--accent); }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary { background: var(--accent); color: white; width: 100%; margin-top: 8px; }
+  .btn-primary:hover { background: #5b4bd5; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; }
+
+  .btn-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(0,184,148,0.3); }
+  .btn-green:hover { background: rgba(0,184,148,0.25); }
+
+  .btn-red { background: var(--red-bg); color: var(--red); border: 1px solid rgba(255,107,107,0.3); }
+  .btn-red:hover { background: rgba(255,107,107,0.25); }
+
+  .btn-outline { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: var(--text-dim); color: var(--text); }
+
+  /* Expense list */
+  .expense-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+
+  .expense-item:last-child { border-bottom: none; }
+
+  .expense-desc { flex: 1; min-width: 0; }
+
+  .expense-desc h3 {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .expense-desc p { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+  .expense-amount { font-size: 16px; font-weight: 700; white-space: nowrap; }
+  .expense-actions { display: flex; gap: 6px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-paid { background: var(--green-bg); color: var(--green); }
+  .badge-unpaid { background: var(--red-bg); color: var(--red); }
+  .badge-partial { background: var(--orange-bg); color: var(--orange); }
+
+  .balance-grid { display: grid; gap: 8px; }
+
+  .balance-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface-2);
+    border-radius: 8px;
+    border-left: 4px solid transparent;
+  }
+
+  .balance-row.owes { border-left-color: var(--red); }
+  .balance-row.owed { border-left-color: var(--green); }
+  .balance-row.settled { border-left-color: var(--border); }
+
+  .balance-name { font-weight: 600; font-size: 14px; }
+  .balance-amount { font-weight: 700; font-size: 15px; }
+  .balance-amount.negative { color: var(--red); }
+  .balance-amount.positive { color: var(--green); }
+  .balance-amount.zero { color: var(--text-dim); }
+
+  .iou-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+
+  .iou-arrow { color: var(--accent-light); margin: 0 6px; }
+  .iou-amount { font-weight: 700; color: var(--orange); }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+  }
+
+  .team-member {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--surface-2);
+    border-radius: 8px;
+  }
+
+  .team-member .num {
+    width: 24px;
+    height: 24px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .team-member input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+
+  .team-member input:focus { border-color: var(--accent); background: var(--surface); }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-value { font-size: 24px; font-weight: 700; }
+  .stat-label { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .payment-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .payment-row:last-child { border-bottom: none; }
+  .payment-row .name { font-size: 14px; }
+  .payment-row .share { font-size: 13px; color: var(--text-dim); margin: 0 12px; }
+
+  .share-box {
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 14px;
+    margin-top: 12px;
+  }
+
+  .share-box textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 10px;
+    font-size: 12px;
+    font-family: monospace;
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .copy-msg { color: var(--green); font-size: 12px; margin-top: 4px; display: none; }
+
+  .empty { text-align: center; padding: 40px 20px; color: var(--text-dim); }
+  .empty-icon { font-size: 40px; margin-bottom: 8px; }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .split-grid { grid-template-columns: 1fr 1fr; }
+    .expense-item { flex-wrap: wrap; }
+    .expense-actions { width: 100%; justify-content: flex-end; margin-top: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>WWSH Tourney <span>Expenses</span></h1>
+    <p>Track, split, and settle up with your team</p>
+  </header>
+
+  <!-- Setup banner (shown when no API URL configured) -->
+  <div class="setup-banner" id="setup-banner">
+    <h3>Connect to Google Sheet</h3>
+    <p>Paste your Google Apps Script web app URL below. See the README for setup instructions.</p>
+    <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
+    <button onclick="saveApiUrl()">Connect</button>
+  </div>
+
+  <div class="sync-bar">
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-text">Connecting...</span>
+    </div>
+    <button class="btn-refresh" onclick="refreshData()">Refresh</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="expenses">Expenses</button>
+    <button class="tab" data-tab="balances">Balances & IOUs</button>
+    <button class="tab" data-tab="team">Team</button>
+    <button class="tab" data-tab="share">Share</button>
+  </div>
+
+  <div class="panel active" id="panel-expenses">
+    <div class="card">
+      <h2>Add Expense</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="exp-desc" placeholder="e.g. Court rental, jerseys...">
+        </div>
+        <div class="form-group">
+          <label>Amount ($)</label>
+          <input type="number" id="exp-amount" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Paid by</label>
+          <select id="exp-payer"></select>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="exp-date">
+        </div>
+        <div class="form-group full">
+          <label>Split among</label>
+          <div style="display:flex;gap:8px;margin-bottom:6px;">
+            <button class="btn btn-sm btn-outline" onclick="selectAllSplit()">Select All</button>
+            <button class="btn btn-sm btn-outline" onclick="deselectAllSplit()">Clear</button>
+          </div>
+          <div class="split-grid" id="split-grid"></div>
+        </div>
+        <div class="form-group full">
+          <button class="btn btn-primary" id="add-btn" onclick="addExpense()">Add Expense</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>All Expenses</h2>
+      <div id="expense-list"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-balances">
+    <div class="card">
+      <h2>Net Balances</h2>
+      <p style="font-size:12px;color:var(--text-dim);margin:-8px 0 12px;">Positive = owed money. Negative = owes money.</p>
+      <div class="balance-grid" id="balance-grid"></div>
+    </div>
+    <div class="card">
+      <h2>Who Owes Who</h2>
+      <p style="font-size:12px;color:var(--text-dim);margin:-8px 0 12px;">Simplified debts to minimize transfers.</p>
+      <div id="iou-list"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-team">
+    <div class="card">
+      <h2>Team Roster</h2>
+      <p style="font-size:12px;color:var(--text-dim);margin:-8px 0 16px;">Edit names below. Changes sync to all teammates.</p>
+      <div class="team-grid" id="team-grid"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-share">
+    <div class="card">
+      <h2>Share with Team</h2>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Copy the summary below and send it to your group chat.</p>
+      <div class="share-box">
+        <textarea id="share-text" readonly></textarea>
+        <button class="btn btn-sm btn-green" style="margin-top:8px;" onclick="copyShare()">Copy to Clipboard</button>
+        <div class="copy-msg" id="copy-msg">Copied!</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Settings</h2>
+      <div class="form-group">
+        <label>Google Apps Script URL</label>
+        <input type="text" id="api-url-display" style="font-family:monospace;font-size:12px;">
+      </div>
+      <button class="btn btn-sm btn-outline" style="margin-top:8px;" onclick="updateApiUrl()">Update URL</button>
+      <button class="btn btn-sm btn-red" style="margin-top:8px;margin-left:8px;" onclick="disconnectSheet()">Disconnect</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <h2 id="modal-title"><span></span><button class="modal-close" onclick="closeModal()">&times;</button></h2>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_NAMES = [
+  'Player 1','Player 2','Player 3','Player 4','Player 5',
+  'Player 6','Player 7','Player 8','Player 9','Player 10'
+];
+
+let state = { members: DEFAULT_NAMES.slice(), expenses: [], payments: {} };
+let API_URL = localStorage.getItem('bball-api-url') || '';
+let syncing = false;
+
+// --- API ---
+async function apiCall(action, body = {}) {
+  if (!API_URL) return null;
+  setSyncStatus('syncing');
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // avoid CORS preflight
+      body: JSON.stringify({ action, ...body })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    setSyncStatus('connected');
+    return data;
+  } catch (err) {
+    console.error('API error:', err);
+    setSyncStatus('error');
+    return null;
+  }
+}
+
+function setSyncStatus(status) {
+  const dot = document.getElementById('sync-dot');
+  const text = document.getElementById('sync-text');
+  dot.className = 'sync-dot';
+
+  if (status === 'connected') { text.textContent = 'Synced with Google Sheet'; }
+  else if (status === 'syncing') { dot.classList.add('syncing'); text.textContent = 'Syncing...'; }
+  else if (status === 'error') { dot.classList.add('error'); text.textContent = 'Sync error — using local data'; }
+  else if (status === 'offline') { dot.classList.add('offline'); text.textContent = 'Offline — set up Google Sheet in Share tab'; }
+}
+
+async function refreshData() {
+  if (!API_URL) {
+    setSyncStatus('offline');
+    loadLocal();
+    render();
+    return;
+  }
+  const data = await apiCall('getAll');
+  if (data) {
+    state.members = data.members && data.members.length ? data.members : DEFAULT_NAMES.slice();
+    state.expenses = data.expenses || [];
+    state.payments = data.payments || {};
+    saveLocal();
+  } else {
+    loadLocal();
+  }
+  render();
+}
+
+function saveLocal() {
+  localStorage.setItem('bball-expenses-data', JSON.stringify(state));
+}
+
+function loadLocal() {
+  try {
+    const s = JSON.parse(localStorage.getItem('bball-expenses-data'));
+    if (s && s.members) {
+      state = s;
+      return;
+    }
+  } catch {}
+  state = { members: DEFAULT_NAMES.slice(), expenses: [], payments: {} };
+}
+
+// --- SETUP ---
+function saveApiUrl() {
+  const url = document.getElementById('api-url-input').value.trim();
+  if (!url) return;
+  API_URL = url;
+  localStorage.setItem('bball-api-url', url);
+  document.getElementById('setup-banner').classList.remove('active');
+  refreshData();
+}
+
+function updateApiUrl() {
+  const url = document.getElementById('api-url-display').value.trim();
+  if (!url) return;
+  API_URL = url;
+  localStorage.setItem('bball-api-url', url);
+  refreshData();
+}
+
+function disconnectSheet() {
+  if (!confirm('Disconnect Google Sheet? Data will only be stored locally.')) return;
+  API_URL = '';
+  localStorage.removeItem('bball-api-url');
+  setSyncStatus('offline');
+  document.getElementById('setup-banner').classList.add('active');
+}
+
+function checkSetup() {
+  if (!API_URL) {
+    document.getElementById('setup-banner').classList.add('active');
+    setSyncStatus('offline');
+  }
+  document.getElementById('api-url-display').value = API_URL;
+}
+
+// --- TABS ---
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+    render();
+  });
+});
+
+// --- RENDER ---
+function render() {
+  renderStats();
+  renderPayerSelect();
+  renderSplitGrid();
+  renderExpenseList();
+  renderBalances();
+  renderTeamGrid();
+  renderShareText();
+}
+
+function renderStats() {
+  const total = state.expenses.reduce((s, e) => s + e.amount, 0);
+  const perPerson = state.expenses.length ? total / state.members.length : 0;
+  const paidCountVal = state.expenses.filter(e => isFullyPaid(e)).length;
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-value">$${total.toFixed(2)}</div><div class="stat-label">Total Expenses</div></div>
+    <div class="stat"><div class="stat-value">$${perPerson.toFixed(2)}</div><div class="stat-label">Avg Per Person</div></div>
+    <div class="stat"><div class="stat-value">${state.expenses.length}</div><div class="stat-label">Expenses</div></div>
+    <div class="stat"><div class="stat-value" style="color:${paidCountVal===state.expenses.length&&state.expenses.length?'var(--green)':'var(--orange)'}">${paidCountVal}/${state.expenses.length}</div><div class="stat-label">Fully Settled</div></div>
+  `;
+}
+
+function renderPayerSelect() {
+  const sel = document.getElementById('exp-payer');
+  const prev = sel.value;
+  sel.innerHTML = state.members.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+  if (prev) sel.value = prev;
+}
+
+function renderSplitGrid() {
+  document.getElementById('split-grid').innerHTML = state.members.map((m, i) => `
+    <label class="split-check"><input type="checkbox" value="${i}" checked> ${m}</label>
+  `).join('');
+}
+
+function selectAllSplit() {
+  document.querySelectorAll('#split-grid input').forEach(c => c.checked = true);
+}
+
+function deselectAllSplit() {
+  document.querySelectorAll('#split-grid input').forEach(c => c.checked = false);
+}
+
+async function addExpense() {
+  const desc = document.getElementById('exp-desc').value.trim();
+  const amount = parseFloat(document.getElementById('exp-amount').value);
+  const payer = parseInt(document.getElementById('exp-payer').value);
+  const date = document.getElementById('exp-date').value || new Date().toISOString().slice(0,10);
+  const splitAmong = [...document.querySelectorAll('#split-grid input:checked')].map(c => parseInt(c.value));
+
+  if (!desc) return alert('Enter a description');
+  if (!amount || amount <= 0) return alert('Enter a valid amount');
+  if (splitAmong.length === 0) return alert('Select at least one person to split with');
+
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  const expense = { id, desc, amount, payer, date, splitAmong };
+
+  // Optimistic local update
+  state.expenses.push(expense);
+  if (!state.payments[id]) state.payments[id] = {};
+  if (splitAmong.includes(payer)) state.payments[id][payer] = true;
+  saveLocal();
+  render();
+
+  // Clear form
+  document.getElementById('exp-desc').value = '';
+  document.getElementById('exp-amount').value = '';
+  document.getElementById('exp-date').value = new Date().toISOString().slice(0,10);
+  renderSplitGrid();
+
+  // Sync to sheet
+  await apiCall('addExpense', expense);
+}
+
+function isFullyPaid(expense) {
+  const payments = state.payments[expense.id] || {};
+  return expense.splitAmong.every(m => m === expense.payer || payments[m]);
+}
+
+function expPaidCount(expense) {
+  const payments = state.payments[expense.id] || {};
+  return expense.splitAmong.filter(m => m === expense.payer || payments[m]).length;
+}
+
+function renderExpenseList() {
+  const list = document.getElementById('expense-list');
+  if (state.expenses.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">&#127936;</div><p>No expenses yet. Add one above!</p></div>';
+    return;
+  }
+
+  list.innerHTML = [...state.expenses].reverse().map(e => {
+    const share = (e.amount / e.splitAmong.length).toFixed(2);
+    const paid = expPaidCount(e);
+    const total = e.splitAmong.length;
+    const fully = paid === total;
+    const partial = paid > 0 && !fully;
+
+    let badge;
+    if (fully) badge = '<span class="badge badge-paid">Settled</span>';
+    else if (partial) badge = `<span class="badge badge-partial">${paid}/${total} Paid</span>`;
+    else badge = '<span class="badge badge-unpaid">Unpaid</span>';
+
+    return `
+      <div class="expense-item">
+        <div class="expense-desc">
+          <h3>${esc(e.desc)}</h3>
+          <p>Paid by <strong>${esc(state.members[e.payer])}</strong> &middot; ${e.date} &middot; $${share}/person &middot; ${badge}</p>
+        </div>
+        <div class="expense-amount">$${e.amount.toFixed(2)}</div>
+        <div class="expense-actions">
+          <button class="btn btn-sm btn-green" onclick="openPaymentDetail('${e.id}')">Details</button>
+          <button class="btn btn-sm btn-red" onclick="deleteExpense('${e.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function deleteExpense(id) {
+  if (!confirm('Delete this expense?')) return;
+  state.expenses = state.expenses.filter(e => e.id !== id);
+  delete state.payments[id];
+  saveLocal();
+  render();
+  await apiCall('deleteExpense', { id });
+}
+
+function openPaymentDetail(id) {
+  const e = state.expenses.find(x => x.id === id);
+  if (!e) return;
+
+  const share = (e.amount / e.splitAmong.length).toFixed(2);
+  const payments = state.payments[e.id] || {};
+
+  document.getElementById('modal-title').querySelector('span').textContent = e.desc;
+  document.getElementById('modal-body').innerHTML = `
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">$${e.amount.toFixed(2)} total &middot; $${share} per person &middot; Paid by ${esc(state.members[e.payer])}</p>
+    ${e.splitAmong.map(m => {
+      const isPayer = m === e.payer;
+      const hasPaid = isPayer || payments[m];
+      return `<div class="payment-row">
+        <span class="name" style="color:${hasPaid ? 'var(--green)' : 'var(--red)'}">${hasPaid ? '&#10003;' : '&#10007;'} ${esc(state.members[m])}</span>
+        <span class="share">$${share}</span>
+        ${isPayer
+          ? '<span class="badge badge-paid">Payer</span>'
+          : `<button class="btn btn-sm ${hasPaid ? 'btn-red' : 'btn-green'}" onclick="togglePayment('${id}',${m})">${hasPaid ? 'Mark Unpaid' : 'Mark Paid'}</button>`
+        }
+      </div>`;
+    }).join('')}
+  `;
+  document.getElementById('modal').classList.add('active');
+}
+
+async function togglePayment(expId, memberIdx) {
+  if (!state.payments[expId]) state.payments[expId] = {};
+  state.payments[expId][memberIdx] = !state.payments[expId][memberIdx];
+  saveLocal();
+  render();
+  openPaymentDetail(expId);
+  await apiCall('togglePayment', { expenseId: expId, memberIdx });
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+// --- BALANCES ---
+function computeBalances() {
+  const bal = new Array(state.members.length).fill(0);
+  state.expenses.forEach(e => {
+    const share = e.amount / e.splitAmong.length;
+    bal[e.payer] += e.amount;
+    e.splitAmong.forEach(m => { bal[m] -= share; });
+  });
+  return bal;
+}
+
+function simplifyDebts(balances) {
+  const debts = [];
+  const bal = balances.slice();
+
+  while (true) {
+    let maxCreditor = -1, maxDebtor = -1;
+    let maxCredit = 0, maxDebt = 0;
+
+    for (let i = 0; i < bal.length; i++) {
+      if (bal[i] > maxCredit + 0.005) { maxCredit = bal[i]; maxCreditor = i; }
+      if (bal[i] < maxDebt - 0.005) { maxDebt = bal[i]; maxDebtor = i; }
+    }
+
+    if (maxCreditor === -1 || maxDebtor === -1) break;
+    const transfer = Math.min(maxCredit, -maxDebt);
+    if (transfer < 0.01) break;
+
+    debts.push({ from: maxDebtor, to: maxCreditor, amount: transfer });
+    bal[maxCreditor] -= transfer;
+    bal[maxDebtor] += transfer;
+  }
+
+  return debts;
+}
+
+function renderBalances() {
+  const bal = computeBalances();
+  const grid = document.getElementById('balance-grid');
+
+  const sorted = state.members.map((m, i) => ({ name: m, idx: i, balance: bal[i] }))
+    .sort((a, b) => b.balance - a.balance);
+
+  grid.innerHTML = sorted.map(p => {
+    const cls = p.balance > 0.01 ? 'owed' : p.balance < -0.01 ? 'owes' : 'settled';
+    const amtCls = p.balance > 0.01 ? 'positive' : p.balance < -0.01 ? 'negative' : 'zero';
+    const label = p.balance > 0.01 ? 'is owed' : p.balance < -0.01 ? 'owes' : 'settled';
+    return `<div class="balance-row ${cls}">
+      <span class="balance-name">${esc(p.name)}</span>
+      <span><span style="color:var(--text-dim);font-size:12px;">${label}</span> <span class="balance-amount ${amtCls}">$${Math.abs(p.balance).toFixed(2)}</span></span>
+    </div>`;
+  }).join('');
+
+  const debts = simplifyDebts(bal);
+  const iouList = document.getElementById('iou-list');
+  if (debts.length === 0) {
+    iouList.innerHTML = '<div class="empty"><p>All settled up!</p></div>';
+    return;
+  }
+
+  iouList.innerHTML = debts.map(d => `
+    <div class="iou-item">
+      <span><strong>${esc(state.members[d.from])}</strong> <span class="iou-arrow">&rarr;</span> <strong>${esc(state.members[d.to])}</strong></span>
+      <span class="iou-amount">$${d.amount.toFixed(2)}</span>
+    </div>
+  `).join('');
+}
+
+// --- TEAM ---
+function renderTeamGrid() {
+  document.getElementById('team-grid').innerHTML = state.members.map((m, i) => `
+    <div class="team-member">
+      <span class="num">${i + 1}</span>
+      <input type="text" value="${esc(m)}" onchange="renameMember(${i}, this.value)" placeholder="Name">
+    </div>
+  `).join('');
+}
+
+let renameTimer = null;
+async function renameMember(idx, name) {
+  state.members[idx] = name.trim() || `Player ${idx + 1}`;
+  saveLocal();
+  render();
+
+  clearTimeout(renameTimer);
+  renameTimer = setTimeout(() => {
+    apiCall('updateMembers', { members: state.members });
+  }, 800);
+}
+
+// --- SHARE ---
+function renderShareText() {
+  const bal = computeBalances();
+  const debts = simplifyDebts(bal);
+  const total = state.expenses.reduce((s, e) => s + e.amount, 0);
+
+  let text = `WWSH TOURNEY EXPENSES\n`;
+  text += `${'='.repeat(35)}\n\n`;
+  text += `Total: $${total.toFixed(2)} across ${state.expenses.length} expense(s)\n\n`;
+
+  if (state.expenses.length) {
+    text += `EXPENSES:\n`;
+    state.expenses.forEach(e => {
+      const share = (e.amount / e.splitAmong.length).toFixed(2);
+      const paid = expPaidCount(e);
+      const status = paid === e.splitAmong.length ? 'SETTLED' : `${paid}/${e.splitAmong.length} paid`;
+      text += `  - ${e.desc}: $${e.amount.toFixed(2)} (paid by ${state.members[e.payer]}, $${share}/person) [${status}]\n`;
+    });
+    text += `\n`;
+  }
+
+  if (debts.length) {
+    text += `WHO OWES WHO:\n`;
+    debts.forEach(d => {
+      text += `  ${state.members[d.from]} owes ${state.members[d.to]}: $${d.amount.toFixed(2)}\n`;
+    });
+  } else {
+    text += `Everyone is settled up!\n`;
+  }
+
+  document.getElementById('share-text').value = text;
+}
+
+function copyShare() {
+  const ta = document.getElementById('share-text');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(() => {
+    const msg = document.getElementById('copy-msg');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 2000);
+  });
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// --- INIT ---
+document.getElementById('exp-date').value = new Date().toISOString().slice(0,10);
+checkSetup();
+refreshData();
+
+// Auto-refresh every 30 seconds when tab is visible
+setInterval(() => { if (!document.hidden) refreshData(); }, 30000);
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
