@@ -496,7 +496,7 @@
   <div class="setup-banner" id="setup-banner">
     <h3>Connect to Google Sheet</h3>
     <p>Paste your Google Apps Script web app URL below. See the README for setup instructions.</p>
-    <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
+    <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/AKfycbypy6RJYB3ooHYDDoe7fcrs1jM39lFBM7GAWQBNGcCcduSiVfFtrRrI2mF55i5kFan6HA/exec">
     <button onclick="saveApiUrl()">Connect</button>
   </div>
 
@@ -613,7 +613,9 @@ const DEFAULT_NAMES = [
 ];
 
 let state = { members: DEFAULT_NAMES.slice(), expenses: [], payments: {} };
-let API_URL = localStorage.getItem('bball-api-url') || '';
+// PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW before deploying:
+const APPS_SCRIPT_URL = '';
+let API_URL = APPS_SCRIPT_URL || localStorage.getItem('bball-api-url') || '';
 let syncing = false;
 
 // --- API ---
