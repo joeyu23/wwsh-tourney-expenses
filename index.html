@@ -900,14 +900,22 @@ function closeModal() {
 
 // --- BALANCES ---
 function computeBalances() {
-  const bal = new Array(state.members.length).fill(0);
-  state.expenses.forEach(e => {
-    const share = e.amount / e.splitAmong.length;
-    bal[e.payer] += e.amount;
-    e.splitAmong.forEach(m => { bal[m] -= share; });
-  });
-  return bal;
-}
+    const bal = new Array(state.members.length).fill(0);
+    state.expenses.forEach(e => {
+      const share = e.amount / e.splitAmong.length;
+      bal[e.payer] += e.amount;
+      e.splitAmong.forEach(m => { bal[m] -= share; });
+
+      const payments = state.payments[e.id] || {};
+      e.splitAmong.forEach(m => {
+        if (m !== e.payer && payments[m]) {
+          bal[m] += share;
+          bal[e.payer] -= share;
+        }
+      });
+    });
+    return bal;
+  }
 
 function simplifyDebts(balances) {
   const debts = [];
