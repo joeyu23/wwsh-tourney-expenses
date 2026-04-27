@@ -52,7 +52,6 @@
   header h1 span { color: var(--accent-light); }
   header p { color: var(--text-dim); font-size: 14px; }
 
-  /* Setup banner */
   .setup-banner {
     background: var(--orange-bg);
     border: 1px solid rgba(253,203,110,0.3);
@@ -63,7 +62,6 @@
   }
 
   .setup-banner.active { display: block; }
-
   .setup-banner h3 { color: var(--orange); font-size: 14px; margin-bottom: 8px; }
   .setup-banner p { color: var(--text-dim); font-size: 13px; line-height: 1.5; }
 
@@ -91,7 +89,6 @@
     cursor: pointer;
   }
 
-  /* Sync indicator */
   .sync-bar {
     display: flex;
     align-items: center;
@@ -101,11 +98,7 @@
     color: var(--text-dim);
   }
 
-  .sync-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .sync-status { display: flex; align-items: center; gap: 6px; }
 
   .sync-dot {
     width: 8px;
@@ -136,7 +129,6 @@
 
   .btn-refresh:hover { border-color: var(--text-dim); color: var(--text); }
 
-  /* Tabs */
   .tabs {
     display: flex;
     gap: 4px;
@@ -162,11 +154,9 @@
   .tab.active { background: var(--accent); color: white; }
   .tab:hover:not(.active) { color: var(--text); }
 
-  /* Panels */
   .panel { display: none; }
   .panel.active { display: block; }
 
-  /* Cards */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -184,7 +174,6 @@
     gap: 8px;
   }
 
-  /* Form */
   .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -219,7 +208,7 @@
 
   .split-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 6px;
   }
 
@@ -230,14 +219,50 @@
     padding: 6px 10px;
     background: var(--surface-2);
     border-radius: 6px;
-    cursor: pointer;
     font-size: 13px;
     transition: background 0.15s;
     user-select: none;
   }
 
   .split-check:hover { background: var(--border); }
-  .split-check input { width: 16px; height: 16px; accent-color: var(--accent); }
+
+  .split-cb-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .split-cb-label .split-cb {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .split-cb-label .split-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .share-input {
+    width: 44px;
+    padding: 4px 6px;
+    font-size: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .share-input:disabled { opacity: 0.4; cursor: not-allowed; }
 
   .btn {
     padding: 10px 20px;
@@ -264,7 +289,6 @@
   .btn-outline { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
   .btn-outline:hover { border-color: var(--text-dim); color: var(--text); }
 
-  /* Expense list */
   .expense-item {
     display: flex;
     align-items: center;
@@ -274,7 +298,6 @@
   }
 
   .expense-item:last-child { border-bottom: none; }
-
   .expense-desc { flex: 1; min-width: 0; }
 
   .expense-desc h3 {
@@ -286,7 +309,6 @@
   }
 
   .expense-desc p { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-
   .expense-amount { font-size: 16px; font-weight: 700; white-space: nowrap; }
   .expense-actions { display: flex; gap: 6px; }
 
@@ -479,7 +501,7 @@
   @media (max-width: 600px) {
     .form-grid { grid-template-columns: 1fr; }
     .stats { grid-template-columns: 1fr 1fr; }
-    .split-grid { grid-template-columns: 1fr 1fr; }
+    .split-grid { grid-template-columns: 1fr; }
     .expense-item { flex-wrap: wrap; }
     .expense-actions { width: 100%; justify-content: flex-end; margin-top: 8px; }
   }
@@ -492,11 +514,10 @@
     <p>Track, split, and settle up with your team</p>
   </header>
 
-  <!-- Setup banner (shown when no API URL configured) -->
   <div class="setup-banner" id="setup-banner">
     <h3>Connect to Google Sheet</h3>
     <p>Paste your Google Apps Script web app URL below. See the README for setup instructions.</p>
-    <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/AKfycbypy6RJYB3ooHYDDoe7fcrs1jM39lFBM7GAWQBNGcCcduSiVfFtrRrI2mF55i5kFan6HA/exec">
+    <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec">
     <button onclick="saveApiUrl()">Connect</button>
   </div>
 
@@ -538,11 +559,12 @@
           <input type="date" id="exp-date">
         </div>
         <div class="form-group full">
-          <label>Split among</label>
+          <label>Split among (× shares)</label>
           <div style="display:flex;gap:8px;margin-bottom:6px;">
             <button class="btn btn-sm btn-outline" onclick="selectAllSplit()">Select All</button>
             <button class="btn btn-sm btn-outline" onclick="deselectAllSplit()">Clear</button>
           </div>
+          <p style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">Bump shares > 1 if a player is covering extras (e.g. family at lunch).</p>
           <div class="split-grid" id="split-grid"></div>
         </div>
         <div class="form-group full">
@@ -613,19 +635,17 @@ const DEFAULT_NAMES = [
 ];
 
 let state = { members: DEFAULT_NAMES.slice(), expenses: [], payments: {} };
-// PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW before deploying:
 const APPS_SCRIPT_URL = '';
 let API_URL = APPS_SCRIPT_URL || localStorage.getItem('bball-api-url') || '';
 let syncing = false;
 
-// --- API ---
 async function apiCall(action, body = {}) {
   if (!API_URL) return null;
   setSyncStatus('syncing');
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' }, // avoid CORS preflight
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action, ...body })
     });
     const data = await res.json();
@@ -643,7 +663,6 @@ function setSyncStatus(status) {
   const dot = document.getElementById('sync-dot');
   const text = document.getElementById('sync-text');
   dot.className = 'sync-dot';
-
   if (status === 'connected') { text.textContent = 'Synced with Google Sheet'; }
   else if (status === 'syncing') { dot.classList.add('syncing'); text.textContent = 'Syncing...'; }
   else if (status === 'error') { dot.classList.add('error'); text.textContent = 'Sync error — using local data'; }
@@ -684,7 +703,6 @@ function loadLocal() {
   state = { members: DEFAULT_NAMES.slice(), expenses: [], payments: {} };
 }
 
-// --- SETUP ---
 function saveApiUrl() {
   const url = document.getElementById('api-url-input').value.trim();
   if (!url) return;
@@ -718,7 +736,6 @@ function checkSetup() {
   document.getElementById('api-url-display').value = API_URL;
 }
 
-// --- TABS ---
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
@@ -729,7 +746,6 @@ document.querySelectorAll('.tab').forEach(t => {
   });
 });
 
-// --- RENDER ---
 function render() {
   renderStats();
   renderPayerSelect();
@@ -762,16 +778,33 @@ function renderPayerSelect() {
 
 function renderSplitGrid() {
   document.getElementById('split-grid').innerHTML = state.members.map((m, i) => `
-    <label class="split-check"><input type="checkbox" value="${i}" checked> ${m}</label>
+    <div class="split-check">
+      <label class="split-cb-label">
+        <input type="checkbox" class="split-cb" value="${i}" checked onchange="onSplitToggle(this)">
+        <span class="split-name">${esc(m)}</span>
+      </label>
+      <input type="number" class="share-input" data-idx="${i}" value="1" min="1" step="1" title="Shares (e.g. 4 if covering family of 4)">
+    </div>
   `).join('');
 }
 
+function onSplitToggle(cb) {
+  const wrapper = cb.closest('.split-check');
+  wrapper.querySelector('.share-input').disabled = !cb.checked;
+}
+
 function selectAllSplit() {
-  document.querySelectorAll('#split-grid input').forEach(c => c.checked = true);
+  document.querySelectorAll('#split-grid .split-cb').forEach(c => {
+    c.checked = true;
+    onSplitToggle(c);
+  });
 }
 
 function deselectAllSplit() {
-  document.querySelectorAll('#split-grid input').forEach(c => c.checked = false);
+  document.querySelectorAll('#split-grid .split-cb').forEach(c => {
+    c.checked = false;
+    onSplitToggle(c);
+  });
 }
 
 async function addExpense() {
@@ -779,30 +812,49 @@ async function addExpense() {
   const amount = parseFloat(document.getElementById('exp-amount').value);
   const payer = parseInt(document.getElementById('exp-payer').value);
   const date = document.getElementById('exp-date').value || new Date().toISOString().slice(0,10);
-  const splitAmong = [...document.querySelectorAll('#split-grid input:checked')].map(c => parseInt(c.value));
+
+  const splitAmong = [];
+  const shares = {};
+  document.querySelectorAll('#split-grid .split-cb:checked').forEach(cb => {
+    const idx = parseInt(cb.value);
+    splitAmong.push(idx);
+    const shareInput = cb.closest('.split-check').querySelector('.share-input');
+    const sc = parseInt(shareInput.value) || 1;
+    if (sc !== 1) shares[idx] = sc;
+  });
 
   if (!desc) return alert('Enter a description');
   if (!amount || amount <= 0) return alert('Enter a valid amount');
   if (splitAmong.length === 0) return alert('Select at least one person to split with');
 
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-  const expense = { id, desc, amount, payer, date, splitAmong };
+  const expense = { id, desc, amount, payer, date, splitAmong, shares };
 
-  // Optimistic local update
   state.expenses.push(expense);
   if (!state.payments[id]) state.payments[id] = {};
   if (splitAmong.includes(payer)) state.payments[id][payer] = true;
   saveLocal();
   render();
 
-  // Clear form
   document.getElementById('exp-desc').value = '';
   document.getElementById('exp-amount').value = '';
   document.getElementById('exp-date').value = new Date().toISOString().slice(0,10);
   renderSplitGrid();
 
-  // Sync to sheet
   await apiCall('addExpense', expense);
+}
+
+function getShareCount(e, m) {
+  return (e.shares && e.shares[m]) ? e.shares[m] : 1;
+}
+function getTotalShares(e) {
+  return e.splitAmong.reduce((s, m) => s + getShareCount(e, m), 0);
+}
+function getMemberAmount(e, m) {
+  return e.amount * getShareCount(e, m) / getTotalShares(e);
+}
+function hasUnequalShares(e) {
+  return e.splitAmong.some(m => getShareCount(e, m) !== 1);
 }
 
 function isFullyPaid(expense) {
@@ -823,7 +875,12 @@ function renderExpenseList() {
   }
 
   list.innerHTML = [...state.expenses].reverse().map(e => {
-    const share = (e.amount / e.splitAmong.length).toFixed(2);
+    const uneven = hasUnequalShares(e);
+    const totalShares = getTotalShares(e);
+    const splitInfo = uneven
+      ? `${totalShares} shares &middot; $${(e.amount/totalShares).toFixed(2)}/share`
+      : `$${(e.amount/e.splitAmong.length).toFixed(2)}/person`;
+
     const paid = expPaidCount(e);
     const total = e.splitAmong.length;
     const fully = paid === total;
@@ -838,7 +895,7 @@ function renderExpenseList() {
       <div class="expense-item">
         <div class="expense-desc">
           <h3>${esc(e.desc)}</h3>
-          <p>Paid by <strong>${esc(state.members[e.payer])}</strong> &middot; ${e.date} &middot; $${share}/person &middot; ${badge}</p>
+          <p>Paid by <strong>${esc(state.members[e.payer])}</strong> &middot; ${e.date} &middot; ${splitInfo} &middot; ${badge}</p>
         </div>
         <div class="expense-amount">$${e.amount.toFixed(2)}</div>
         <div class="expense-actions">
@@ -863,18 +920,25 @@ function openPaymentDetail(id) {
   const e = state.expenses.find(x => x.id === id);
   if (!e) return;
 
-  const share = (e.amount / e.splitAmong.length).toFixed(2);
   const payments = state.payments[e.id] || {};
+  const uneven = hasUnequalShares(e);
+  const totalShares = getTotalShares(e);
+  const headerSplit = uneven
+    ? `${totalShares} shares &middot; $${(e.amount/totalShares).toFixed(2)}/share`
+    : `$${(e.amount/e.splitAmong.length).toFixed(2)} per person`;
 
   document.getElementById('modal-title').querySelector('span').textContent = e.desc;
   document.getElementById('modal-body').innerHTML = `
-    <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">$${e.amount.toFixed(2)} total &middot; $${share} per person &middot; Paid by ${esc(state.members[e.payer])}</p>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">$${e.amount.toFixed(2)} total &middot; ${headerSplit} &middot; Paid by ${esc(state.members[e.payer])}</p>
     ${e.splitAmong.map(m => {
       const isPayer = m === e.payer;
       const hasPaid = isPayer || payments[m];
+      const memberAmt = getMemberAmount(e, m).toFixed(2);
+      const sc = getShareCount(e, m);
+      const shareLabel = uneven ? ` <span style="color:var(--text-dim);font-size:11px;">(${sc} share${sc !== 1 ? 's' : ''})</span>` : '';
       return `<div class="payment-row">
-        <span class="name" style="color:${hasPaid ? 'var(--green)' : 'var(--red)'}">${hasPaid ? '&#10003;' : '&#10007;'} ${esc(state.members[m])}</span>
-        <span class="share">$${share}</span>
+        <span class="name" style="color:${hasPaid ? 'var(--green)' : 'var(--red)'}">${hasPaid ? '&#10003;' : '&#10007;'} ${esc(state.members[m])}${shareLabel}</span>
+        <span class="share">$${memberAmt}</span>
         ${isPayer
           ? '<span class="badge badge-paid">Payer</span>'
           : `<button class="btn btn-sm ${hasPaid ? 'btn-red' : 'btn-green'}" onclick="togglePayment('${id}',${m})">${hasPaid ? 'Mark Unpaid' : 'Mark Paid'}</button>`
@@ -898,24 +962,23 @@ function closeModal() {
   document.getElementById('modal').classList.remove('active');
 }
 
-// --- BALANCES ---
 function computeBalances() {
-    const bal = new Array(state.members.length).fill(0);
-    state.expenses.forEach(e => {
-      const share = e.amount / e.splitAmong.length;
-      bal[e.payer] += e.amount;
-      e.splitAmong.forEach(m => { bal[m] -= share; });
+  const bal = new Array(state.members.length).fill(0);
+  state.expenses.forEach(e => {
+    bal[e.payer] += e.amount;
+    e.splitAmong.forEach(m => { bal[m] -= getMemberAmount(e, m); });
 
-      const payments = state.payments[e.id] || {};
-      e.splitAmong.forEach(m => {
-        if (m !== e.payer && payments[m]) {
-          bal[m] += share;
-          bal[e.payer] -= share;
-        }
-      });
+    const payments = state.payments[e.id] || {};
+    e.splitAmong.forEach(m => {
+      if (m !== e.payer && payments[m]) {
+        const amt = getMemberAmount(e, m);
+        bal[m] += amt;
+        bal[e.payer] -= amt;
+      }
     });
-    return bal;
-  }
+  });
+  return bal;
+}
 
 function simplifyDebts(balances) {
   const debts = [];
@@ -974,7 +1037,6 @@ function renderBalances() {
   `).join('');
 }
 
-// --- TEAM ---
 function renderTeamGrid() {
   document.getElementById('team-grid').innerHTML = state.members.map((m, i) => `
     <div class="team-member">
@@ -996,7 +1058,6 @@ async function renameMember(idx, name) {
   }, 800);
 }
 
-// --- SHARE ---
 function renderShareText() {
   const bal = computeBalances();
   const debts = simplifyDebts(bal);
@@ -1009,10 +1070,22 @@ function renderShareText() {
   if (state.expenses.length) {
     text += `EXPENSES:\n`;
     state.expenses.forEach(e => {
-      const share = (e.amount / e.splitAmong.length).toFixed(2);
+      const uneven = hasUnequalShares(e);
+      const totalShares = getTotalShares(e);
+      const splitInfo = uneven
+        ? `${totalShares} shares, $${(e.amount/totalShares).toFixed(2)}/share`
+        : `$${(e.amount/e.splitAmong.length).toFixed(2)}/person`;
       const paid = expPaidCount(e);
       const status = paid === e.splitAmong.length ? 'SETTLED' : `${paid}/${e.splitAmong.length} paid`;
-      text += `  - ${e.desc}: $${e.amount.toFixed(2)} (paid by ${state.members[e.payer]}, $${share}/person) [${status}]\n`;
+      text += `  - ${e.desc}: $${e.amount.toFixed(2)} (paid by ${state.members[e.payer]}, ${splitInfo}) [${status}]\n`;
+      if (uneven) {
+        e.splitAmong.forEach(m => {
+          const sc = getShareCount(e, m);
+          if (sc !== 1) {
+            text += `      ${state.members[m]}: ${sc} shares ($${getMemberAmount(e, m).toFixed(2)})\n`;
+          }
+        });
+      }
     });
     text += `\n`;
   }
@@ -1045,12 +1118,10 @@ function esc(s) {
   return d.innerHTML;
 }
 
-// --- INIT ---
 document.getElementById('exp-date').value = new Date().toISOString().slice(0,10);
 checkSetup();
 refreshData();
 
-// Auto-refresh every 30 seconds when tab is visible
 setInterval(() => { if (!document.hidden) refreshData(); }, 30000);
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
